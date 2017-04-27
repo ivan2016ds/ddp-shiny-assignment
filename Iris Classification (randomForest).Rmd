@@ -1,0 +1,57 @@
+---
+title: "Iris Classification (randomForest)"
+author: "Ivan"
+date: "April 28, 2017"
+output: ioslides_presentation
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=T,message=F,warning=F)
+```
+
+## Introduction
+
+This Shiny application build a simple `randomForest` model on `iris` dataset, targeting `Species` variable, with 2 predictors selected from GUI.
+Misclassification rate will be calculated and displayed in terms of percentage value and also in the scatter plot.
+
+
+## Load Library and Build Model
+
+```{r loadLib}
+# library(shiny) # not used here
+library(ggplot2)
+library(plotly)
+library(randomForest)
+```
+
+```{r buildModel,comment=""}
+data("iris")
+set.seed(20170428)
+fit <- randomForest(x=iris[,c("Petal.Length","Petal.Width")],
+                    y=iris$Species)
+err <- round(mean(fit$confusion[,"class.error"])*100,2)
+print(paste0(err,"%"))
+```
+
+## Create Plot
+
+```{r createPlot}
+Misclassified <- ifelse(fit$predicted==iris$Species,0,1)
+
+resPlot <- ggplot(data=iris)
+resPlot <- resPlot + geom_point(aes(x=Petal.Length,
+                                    y=Petal.Width,
+                                    color=Species))
+resPlot <- resPlot + geom_point(aes(x=Petal.Length,
+                                    y=Petal.Width,
+                                    color=fit$predicted,
+                                    alpha=Misclassified),
+                                shape=1,size=3)
+resPlot <- resPlot + ggtitle("Petal.Width vs Petal.Length")
+resPlot <- ggplotly(resPlot)
+```
+
+## Draw Plot
+
+```{r drawPlot}
+resPlot
+```
